@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理系统文档</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg-color: #fff;
+            --text-color: #333;
+            --muted-color: #666;
+            --border-color: #DCDFE6;
+            --primary-color: #409EFF;
+            --primary-bg: #ecf5ff;
+            --primary-light: #a0cfff;
+            --header-bg: #409EFF;
+            --header-color: white;
+            --code-bg: #f6f8fa;
+            --hover-bg: #ecf5ff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg-color: #2c2c2c;
+            --text-color: #e0e0e0;
+            --muted-color: #aaa;
+            --border-color: #444;
+            --primary-color: #5cadff;
+            --primary-bg: #213d5b;
+            --primary-light: #2a4d73;
+            --header-bg: #213d5b;
+            --header-color: #e0e0e0;
+            --code-bg: #2d2d2d;
+            --hover-bg: #213d5b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 共享样式 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            padding-top: 60px; /* 为固定header留出空间 */
+            min-height: calc(100vh - 60px); /* 确保最小高度占满剩余视口 */
+        }
+        
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-color);
+            padding: 15px 20px;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: fixed; /* 固定在顶部 */
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000; /* 确保在最上层 */
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-title {
+            margin: 0;
+            margin-left: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .menu-button {
+            background-color: transparent;
+            color: var(--header-color);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: none;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-button-icon {
+            width: 24px;
+            height: 3px;
+            background-color: var(--header-color);
+            position: relative;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .menu-button-icon::before,
+        .menu-button-icon::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 3px;
+            background-color: var(--header-color);
+            transition: all 0.3s;
+        }
+        
+        .menu-button-icon::before {
+            transform: translateY(-8px);
+        }
+        
+        .menu-button-icon::after {
+            transform: translateY(8px);
+        }
+        
+        .menu-button.active .menu-button-icon {
+            background-color: transparent;
+        }
+        
+        .menu-button.active .menu-button-icon::before {
+            transform: rotate(45deg);
+        }
+        
+        .menu-button.active .menu-button-icon::after {
+            transform: rotate(-45deg);
+        }
+        
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-color);
+            transition: .4s;
+            border-radius: 30px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--primary-color);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .print-button {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .print-button:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .content {
+            display: flex;
+            background-color: var(--card-bg-color);
+            min-height: calc(100vh - 60px); /* 内容区最小高度占满视口剩余空间 */
+            width: 100%;
+            border-radius: 0; /* 去除圆角 */
+            box-shadow: none; /* 移除阴影 */
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            flex: 0 0 250px;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, margin-left 0.3s ease;
+            overflow-y: auto;
+            height: calc(100vh - 60px); /* 使侧边栏高度与视口一致 */
+            max-height: none; /* 移除最大高度限制 */
+            z-index: 10;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100vh - 60px); /* 确保内容区域高度填满视口 */
+            max-height: none; /* 移除最大高度限制 */
+            transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+        }
+        
+        .doc-list {
+            list-style: none;
+            padding: 0;
+            overflow-y: auto;
+        }
+        
+        .doc-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .doc-item:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .doc-item.active {
+            background-color: var(--primary-bg);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .doc-item.hidden {
+            display: none;
+        }
+        
+        .doc-content {
+            display: none;
+        }
+        
+        .doc-content.active {
+            display: block;
+        }
+        
+        .doc-content h1, .doc-content h2, .doc-content h3, 
+        .doc-content h4, .doc-content h5, .doc-content h6 {
+            color: var(--text-color);
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--code-bg);
+        }
+        
+        /* 代码块和预格式化文本 */
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 0.9em;
+        }
+        
+        /* 保持线框图的格式 */
+        .markdown-content pre {
+            white-space: pre;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+                padding-top: 60px;
+            }
+            
+            .content {
+                flex-direction: column;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 80%; /* 不占满整个宽度，侧滑菜单 */
+                max-height: 100vh;
+                height: 100vh;
+                border-right: 1px solid var(--border-color);
+                border-bottom: none;
+                position: fixed;
+                top: 60px; /* header高度 */
+                left: 0;
+                bottom: 0;
+                z-index: 100;
+                background-color: var(--card-bg-color);
+                transform: translateX(-100%); /* 向左隐藏 */
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+                padding-bottom: 60px; /* 确保底部内容可见 */
+                box-shadow: 2px 0 5px var(--shadow-color);
+            }
+            
+            .sidebar.visible {
+                transform: translateX(0); /* 显示菜单 */
+            }
+            
+            .main-content {
+                max-height: none;
+                width: 100%;
+                padding-top: 10px; /* 调整顶部间距 */
+            }
+            
+            /* 遮罩层，点击关闭菜单 */
+            .menu-overlay {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 90;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .menu-overlay.visible {
+                display: block;
+                opacity: 1;
+            }
+            
+            .menu-button {
+                display: flex;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .header-title {
+                font-size: 1.5rem;
+                margin-bottom: 0;
+            }
+            
+            .header-controls {
+                width: auto;
+                justify-content: flex-end;
+            }
+        }
+        
+        /* 打印样式 */
+        @media print {
+            header, .sidebar, .print-button, .theme-switch, .menu-button {
+                display: none !important;
+            }
+            
+            body, .container, .content, .main-content {
+                margin: 0;
+                padding: 0;
+                background-color: white;
+                color: black;
+                box-shadow: none;
+            }
+            
+            .content {
+                display: block;
+            }
+            
+            .doc-content {
+                display: block !important;
+                page-break-after: always;
+            }
+            
+            .doc-content:last-child {
+                page-break-after: avoid;
+            }
+        }
+        
+        /* 高亮搜索结果 */
+        .highlight-search {
+            background-color: yellow;
+            color: black;
+        }
+        
+        /* 黑暗模式下的语法高亮 */
+        [data-theme="dark"] .codehilite {
+            background-color: #282c34;
+            border-color: #555;
+        }
+        
+        [data-theme="dark"] .codehilite .hll { background-color: #2c313a }
+        [data-theme="dark"] .codehilite .c { color: #5c6370; font-style: italic } /* 注释 */
+        [data-theme="dark"] .codehilite .err { color: #f44747 } /* 错误 */
+        [data-theme="dark"] .codehilite .k { color: #c678dd; font-weight: bold } /* 关键字 */
+        [data-theme="dark"] .codehilite .o { color: #abb2bf } /* 操作符 */
+        [data-theme="dark"] .codehilite .ch { color: #5c6370; font-style: italic } /* 注释 */
+        [data-theme="dark"] .codehilite .cm { color: #5c6370; font-style: italic } /* 多行注释 */
+        [data-theme="dark"] .codehilite .cp { color: #e5c07b } /* 预处理器 */
+        [data-theme="dark"] .codehilite .cpf { color: #5c6370; font-style: italic } /* 注释 */
+        [data-theme="dark"] .codehilite .c1 { color: #5c6370; font-style: italic } /* 单行注释 */
+        [data-theme="dark"] .codehilite .cs { color: #5c6370; font-style: italic } /* 特殊注释 */
+        [data-theme="dark"] .codehilite .s { color: #98c379 } /* 字符串 */
+        [data-theme="dark"] .codehilite .na { color: #e06c75 } /* 名称.属性 */
+        [data-theme="dark"] .codehilite .nb { color: #56b6c2 } /* 名称.内置 */
+        [data-theme="dark"] .codehilite .nc { color: #e5c07b; font-weight: bold } /* 名称.类 */
+        [data-theme="dark"] .codehilite .nf { color: #61afef } /* 名称.函数 */
+        [data-theme="dark"] .codehilite .m { color: #d19a66 } /* 数字 */
+        
+        /* Pygments语法高亮样式 - 浅色模式 */
+        .codehilite .hll { background-color: #ffffcc }
+        .codehilite .c { color: #408080; font-style: italic } /* 注释 */
+        .codehilite .err { border: 1px solid #FF0000 } /* 错误 */
+        .codehilite .k { color: #008000; font-weight: bold } /* 关键字 */
+        .codehilite .o { color: #666666 } /* 操作符 */
+        .codehilite .ch { color: #408080; font-style: italic } /* 注释 */
+        .codehilite .cm { color: #408080; font-style: italic } /* 多行注释 */
+        .codehilite .cp { color: #BC7A00 } /* 预处理器 */
+        .codehilite .cpf { color: #408080; font-style: italic } /* 注释 */
+        .codehilite .c1 { color: #408080; font-style: italic } /* 单行注释 */
+        .codehilite .cs { color: #408080; font-style: italic } /* 特殊注释 */
+        .codehilite .gd { color: #A00000 } /* 删除 */
+        .codehilite .ge { font-style: italic } /* 强调 */
+        .codehilite .gr { color: #FF0000 } /* Error */
+        .codehilite .gh { color: #000080; font-weight: bold } /* Heading */
+        .codehilite .gi { color: #00A000 } /* Inserted */
+        .codehilite .go { color: #888888 } /* Output */
+        .codehilite .gp { color: #000080; font-weight: bold } /* Prompt */
+        .codehilite .gs { font-weight: bold } /* Strong */
+        .codehilite .gu { color: #800080; font-weight: bold } /* Subheading */
+        .codehilite .gt { color: #0044DD } /* Traceback */
+        .codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+        .codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+        .codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+        .codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+        .codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+        .codehilite .kt { color: #B00040 } /* Keyword.Type */
+        .codehilite .m { color: #666666 } /* Literal.Number */
+        .codehilite .s { color: #BA2121 } /* Literal.String */
+        .codehilite .na { color: #7D9029 } /* Name.Attribute */
+        .codehilite .nb { color: #008000 } /* Name.Builtin */
+        .codehilite .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+        .codehilite .no { color: #880000 } /* Name.Constant */
+        .codehilite .nd { color: #AA22FF } /* Name.Decorator */
+        .codehilite .ni { color: #999999; font-weight: bold } /* Name.Entity */
+        .codehilite .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+        .codehilite .nf { color: #0000FF } /* Name.Function */
+        .codehilite .nl { color: #A0A000 } /* Name.Label */
+        .codehilite .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+        .codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+        .codehilite .nv { color: #19177C } /* Name.Variable */
+        .codehilite .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+        .codehilite .w { color: #bbbbbb } /* Text.Whitespace */
+        .codehilite .mb { color: #666666 } /* Literal.Number.Bin */
+        .codehilite .mf { color: #666666 } /* Literal.Number.Float */
+        .codehilite .mh { color: #666666 } /* Literal.Number.Hex */
+        .codehilite .mi { color: #666666 } /* Literal.Number.Integer */
+        .codehilite .mo { color: #666666 } /* Literal.Number.Oct */
+        .codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+        .codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+        .codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+        .codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+        .codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+        .codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+        .codehilite .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+        .codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+        .codehilite .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+        .codehilite .sx { color: #008000 } /* Literal.String.Other */
+        .codehilite .sr { color: #BB6688 } /* Literal.String.Regex */
+        .codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+        .codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+        .codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+        .codehilite .fm { color: #0000FF } /* Name.Function.Magic */
+        .codehilite .vc { color: #19177C } /* Name.Variable.Class */
+        .codehilite .vg { color: #19177C } /* Name.Variable.Global */
+        .codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+        .codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+        .codehilite .il { color: #666666 } /* Literal.Number.Integer.Long */
+        
+        /* 代码块容器 */
+        .codehilite {
+            background-color: var(--code-bg);
+            padding: 1em;
+            border-radius: 5px;
+            margin: 1em 0;
+            border: 1px solid var(--border-color);
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <button class="menu-button" id="menu-toggle" title="显示/隐藏文档列表">
+                <span class="menu-button-icon"></span>
+            </button>
+            <h1 class="header-title" style="display: inline-block; margin-left: 10px;">商品管理系统文档</h1>
+        </div>
+        <div class="header-controls">
+            <input type="text" class="search-input" id="global-search" placeholder="全局搜索..." style="display: none;">
+            <button class="print-button" id="print-button">
+                <span>打印</span>
+            </button>
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </header>
+    <div class="container">
+        <div class="content">
+            <div class="sidebar" id="sidebar">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="doc-search" placeholder="搜索文档...">
+                </div>
+                <h2>文档列表</h2>
+                <ul class="doc-list">
+                    {% for doc in documents %}
+                    <li class="doc-item" data-doc-id="{{ forloop.counter }}" data-filename="{{ doc.filename }}">{{ doc.filename }}</li>
+                    {% empty %}
+                    <li>没有找到文档</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <!-- 添加遮罩层，点击关闭菜单 -->
+            <div class="menu-overlay" id="menu-overlay"></div>
+            <div class="main-content" id="main-content">
+                {% for doc in documents %}
+                <div id="doc-{{ forloop.counter }}" class="doc-content {% if forloop.first %}active{% endif %}">
+                    <h2>{{ doc.filename }}</h2>
+                    <div class="markdown-content">
+                        {{ doc.content|safe }}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="doc-content active">
+                    <p>没有找到文档，请确认doc目录中是否包含.md文件。</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docItems = document.querySelectorAll('.doc-item');
+            const docContents = document.querySelectorAll('.doc-content');
+            const docSearchInput = document.getElementById('doc-search');
+            const themeToggle = document.getElementById('theme-toggle');
+            const printButton = document.getElementById('print-button');
+            const htmlElement = document.documentElement;
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const menuOverlay = document.getElementById('menu-overlay');
+            
+            // 初始化第一个文档为激活状态
+            if (docItems.length > 0) {
+                docItems[0].classList.add('active');
+            }
+            
+            // 文档切换
+            docItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有激活状态
+                    docItems.forEach(i => i.classList.remove('active'));
+                    docContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 激活选中的文档
+                    const docId = this.getAttribute('data-doc-id');
+                    this.classList.add('active');
+                    document.getElementById('doc-' + docId).classList.add('active');
+                    
+                    // 如果是在移动设备上，点击文档后自动隐藏侧边栏
+                    if (window.innerWidth <= 768) {
+                        toggleMobileMenu(false); // 关闭菜单
+                    }
+                });
+            });
+            
+            // 切换移动端菜单显示
+            function toggleMobileMenu(show) {
+                if (window.innerWidth <= 768) {
+                    if (show === undefined) {
+                        // 切换显示/隐藏
+                        sidebar.classList.toggle('visible');
+                        menuOverlay.classList.toggle('visible');
+                        menuToggle.classList.toggle('active');
+                    } else if (show) {
+                        // 显示菜单
+                        sidebar.classList.add('visible');
+                        menuOverlay.classList.add('visible');
+                        menuToggle.classList.add('active');
+                    } else {
+                        // 隐藏菜单
+                        sidebar.classList.remove('visible');
+                        menuOverlay.classList.remove('visible');
+                        menuToggle.classList.remove('active');
+                    }
+                }
+            }
+            
+            // 菜单按钮点击事件
+            menuToggle.addEventListener('click', function() {
+                toggleMobileMenu();
+            });
+            
+            // 点击遮罩层关闭菜单
+            menuOverlay.addEventListener('click', function() {
+                toggleMobileMenu(false);
+            });
+            
+            // 文档搜索功能
+            docSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                docItems.forEach(item => {
+                    const filename = item.getAttribute('data-filename').toLowerCase();
+                    if (filename.includes(searchTerm)) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                // 如果没有结果，显示所有
+                const visibleItems = document.querySelectorAll('.doc-item:not(.hidden)');
+                if (visibleItems.length === 0 && searchTerm !== '') {
+                    // 内容搜索
+                    searchInDocumentContents(searchTerm);
+                } else {
+                    // 移除高亮
+                    clearHighlights();
+                }
+            });
+            
+            // 内容搜索和高亮
+            function searchInDocumentContents(term) {
+                if (!term) return;
+                
+                clearHighlights();
+                
+                let foundInAny = false;
+                
+                docContents.forEach((content, index) => {
+                    const textContent = content.textContent.toLowerCase();
+                    if (textContent.includes(term)) {
+                        foundInAny = true;
+                        docItems[index].classList.remove('hidden');
+                        
+                        // 高亮匹配文本
+                        highlightText(content, term);
+                    }
+                });
+                
+                // 如果还是没找到，显示所有
+                if (!foundInAny) {
+                    docItems.forEach(item => item.classList.remove('hidden'));
+                }
+            }
+            
+            // 高亮文本
+            function highlightText(element, term) {
+                const innerHTML = element.innerHTML;
+                const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+                element.innerHTML = innerHTML.replace(regex, '<span class="highlight-search">$1</span>');
+            }
+            
+            // 清除高亮
+            function clearHighlights() {
+                docContents.forEach(content => {
+                    content.innerHTML = content.innerHTML.replace(/<span class="highlight-search">(.*?)<\/span>/g, '$1');
+                });
+            }
+            
+            // 转义正则表达式特殊字符
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            
+            // 暗色/亮色主题切换
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    htmlElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            // 加载保存的主题偏好
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                htmlElement.setAttribute('data-theme', 'dark');
+                themeToggle.checked = true;
+            }
+            
+            // 打印功能
+            printButton.addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>
