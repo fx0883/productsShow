@@ -259,15 +259,19 @@
         .doc-list {
             list-style: none;
             padding: 0;
+            margin: 0;
             overflow-y: auto;
         }
         
         .doc-item {
-            padding: 10px;
-            margin-bottom: 5px;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
             cursor: pointer;
-            border-radius: 4px;
             transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
         }
         
         .doc-item:hover {
@@ -571,6 +575,15 @@
             font-size: 14px;
             line-height: 1.5;
         }
+        
+        /* 文档内容默认隐藏，激活时显示 */
+        .document-item {
+            display: none;
+        }
+        
+        .document-item.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -610,7 +623,7 @@
                 <h2>文档列表</h2>
                 <ul class="doc-list">
                     {% for doc in documents %}
-                    <li class="doc-item" data-doc-id="{{ forloop.counter }}" data-filename="{{ doc.filename }}">{{ doc.filename }}</li>
+                    <li class="doc-item" data-doc-id="{{ doc.id }}" title="{{ doc.filename }}">{{ doc.filename }}</li>
                     {% empty %}
                     <li>没有找到文档</li>
                     {% endfor %}
@@ -621,7 +634,7 @@
             <div class="main-content" id="main-content">
                 {% if documents %}
                     {% for document in documents %}
-                    <div class="document-item" id="document-{{ forloop.counter }}">
+                    <div class="document-item" id="document-{{ document.id }}">
                         <h2>{{ document.filename }}</h2>
                         <div class="document-content">{{ document.content|safe }}</div>
                     </div>
@@ -654,6 +667,16 @@
             // 初始化第一个文档为激活状态
             if (docItems.length > 0) {
                 docItems[0].classList.add('active');
+                
+                // 隐藏所有文档内容，只显示第一个
+                const documentItems = document.querySelectorAll('.document-item');
+                documentItems.forEach((doc, index) => {
+                    if (index === 0) {
+                        doc.classList.add('active');
+                    } else {
+                        doc.classList.remove('active');
+                    }
+                });
             }
             
             // 文档切换
@@ -661,12 +684,26 @@
                 item.addEventListener('click', function() {
                     // 移除所有激活状态
                     docItems.forEach(i => i.classList.remove('active'));
-                    docContents.forEach(c => c.classList.remove('active'));
                     
-                    // 激活选中的文档
+                    // 获取选中的文档ID
                     const docId = this.getAttribute('data-doc-id');
+                    console.log('点击了文档项：', docId, this.textContent);
+                    
+                    // 激活当前选中的文档项
                     this.classList.add('active');
-                    document.getElementById('doc-' + docId).classList.add('active');
+                    
+                    // 隐藏所有文档内容
+                    const documentItems = document.querySelectorAll('.document-item');
+                    documentItems.forEach(doc => doc.classList.remove('active'));
+                    
+                    // 显示选中的文档内容
+                    const targetDoc = document.getElementById('document-' + docId);
+                    console.log('目标文档元素：', targetDoc);
+                    if (targetDoc) {
+                        targetDoc.classList.add('active');
+                    } else {
+                        console.error('未找到对应的文档内容元素：document-' + docId);
+                    }
                     
                     // 如果是在移动设备上，点击文档后自动隐藏侧边栏
                     if (window.innerWidth <= 768) {

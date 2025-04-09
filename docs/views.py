@@ -91,53 +91,58 @@ def document_list(request):
         files_list = os.listdir(doc_dir)
         logger.debug(f"目录中的文件列表: {files_list}")
         
-        for filename in files_list:
-            if filename.endswith('.md'):
-                file_path = os.path.join(doc_dir, filename)
-                logger.debug(f"处理Markdown文件: {file_path}")
-                
+        # 过滤只包含英文文件名的文件，避免中文编码问题
+        md_files = [f for f in files_list if f.endswith('.md') and not any(ord(c) > 127 for c in f)]
+        logger.info(f"找到 {len(md_files)} 个有效的Markdown文件")
+        
+        for index, filename in enumerate(md_files, 1):
+            file_path = os.path.join(doc_dir, filename)
+            logger.debug(f"处理Markdown文件 #{index}: {file_path}")
+            
+            try:
+                # 尝试使用二进制模式读取文件，然后手动解码
+                with open(file_path, 'rb') as f:
+                    binary_content = f.read()
+                    
+                # 尝试删除任何非法UTF-8序列
                 try:
-                    # 尝试使用二进制模式读取文件，然后手动解码
-                    with open(file_path, 'rb') as f:
-                        binary_content = f.read()
-                        
-                    # 尝试删除任何非法UTF-8序列
-                    try:
-                        content = binary_content.decode('utf-8', 'ignore')
-                        logger.debug(f"成功读取文件: {filename}, 大小: {len(content)} 字节")
-                    except UnicodeError:
-                        logger.warning(f"文件解码问题: {filename}, 使用fallback解码")
-                        content = binary_content.decode('latin1')
-                    
-                    # 清理内容中的无效Unicode字符
-                    content = clean_unicode_surrogates(content)
-                    
-                    # 转换Markdown为HTML，添加更多扩展支持
-                    extensions = [
-                        'tables',
-                        'fenced_code',
-                        'codehilite',
-                        'nl2br',
-                        'extra'
-                    ]
-                    html_content = markdown.markdown(content, extensions=extensions)
-                    logger.debug(f"Markdown 转换为 HTML 成功: {filename}")
-                    
-                    # 确保HTML内容不包含代理对
-                    html_content = clean_unicode_surrogates(html_content)
-                    
-                    # 确保文件名也被清理
-                    clean_filename = clean_unicode_surrogates(filename)
-                    
-                    documents.append({
-                        'filename': clean_filename,
-                        'content': html_content
-                    })
-                except Exception as e:
-                    logger.error(f"处理文件 {filename} 时出错: {str(e)}", exc_info=True)
+                    content = binary_content.decode('utf-8', 'ignore')
+                    logger.debug(f"成功读取文件: {filename}, 大小: {len(content)} 字节")
+                except UnicodeError:
+                    logger.warning(f"文件解码问题: {filename}, 使用fallback解码")
+                    content = binary_content.decode('latin1')
+                
+                # 清理内容中的无效Unicode字符
+                content = clean_unicode_surrogates(content)
+                
+                # 转换Markdown为HTML，添加更多扩展支持
+                extensions = [
+                    'tables',
+                    'fenced_code',
+                    'codehilite',
+                    'nl2br',
+                    'extra'
+                ]
+                html_content = markdown.markdown(content, extensions=extensions)
+                logger.debug(f"Markdown 转换为 HTML 成功: {filename}")
+                
+                # 确保HTML内容不包含代理对
+                html_content = clean_unicode_surrogates(html_content)
+                
+                # 确保文件名也被清理
+                clean_filename = clean_unicode_surrogates(filename)
+                
+                documents.append({
+                    'id': index,  # 添加明确的ID
+                    'filename': clean_filename,
+                    'content': html_content
+                })
+                logger.debug(f"添加文档到列表: ID={index}, 文件名={clean_filename}")
+            except Exception as e:
+                logger.error(f"处理文件 {filename} 时出错: {str(e)}", exc_info=True)
         
         logger.info(f"文档处理完成，共加载 {len(documents)} 个文档")
-        context = {'documents': documents}
+        context = {'documents': documents, 'debug_info': {'doc_dir': doc_dir, 'file_count': len(md_files)}}
         return safe_render(request, 'docs/document_list.html', context)
         
     except Exception as e:
