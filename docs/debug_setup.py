@@ -31,7 +31,8 @@ def setup_debug_logging():
             level=logging.DEBUG,
             format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
             filename=debug_log,
-            filemode='a'
+            filemode='a',
+            encoding='utf-8'  # 添加UTF-8编码支持
         )
         
         # 记录系统信息
@@ -87,7 +88,7 @@ def setup_debug_logging():
         wsgi_path = os.path.join(base_dir, 'product_show', 'wsgi.py')
         if os.path.exists(wsgi_path):
             logger.info(f'wsgi.py文件存在: {wsgi_path}')
-            with open(wsgi_path, 'r') as f:
+            with open(wsgi_path, 'r', encoding='utf-8') as f:  # 添加编码
                 logger.info(f'wsgi.py文件内容:\n{f.read()}')
         else:
             logger.error(f'wsgi.py文件不存在: {wsgi_path}')
@@ -96,7 +97,7 @@ def setup_debug_logging():
         wsgi_log = os.path.join(base_dir, 'wsgi_debug.log')
         if os.path.exists(wsgi_log):
             logger.info(f'wsgi_debug.log文件存在，内容:')
-            with open(wsgi_log, 'r') as f:
+            with open(wsgi_log, 'r', encoding='utf-8') as f:  # 添加编码
                 logger.info(f.read())
         else:
             logger.info(f'wsgi_debug.log文件不存在')

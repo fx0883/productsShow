@@ -16,7 +16,8 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s',
     filename='wsgi_debug.log',
-    filemode='a'
+    filemode='a',
+    encoding='utf-8'  # 添加UTF-8编码
 )
 
 # 记录WSGI启动信息

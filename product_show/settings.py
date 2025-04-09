@@ -143,6 +143,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'django_debug.log'),
             'formatter': 'verbose',
+            'encoding': 'utf-8',  # 添加UTF-8编码
         },
         'console': {
             'level': 'INFO',
