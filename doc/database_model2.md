@@ -12,7 +12,65 @@
 
 ## 2. 实体关系图
 
-![实体关系图](https://placeholder-for-erd-diagram.com)
+```
++---------------+     +----------------+     +---------------+
+|     User      |     |  UserProfile   |     |   UserToken   |
++---------------+     +----------------+     +---------------+
+| id            |<-+  | id             |     | id            |
+| username      |  |  | user_id        |--+  | user_id       |
+| password      |  |  | prefer_language|  |  | token         |
+| email         |  |  | date_format    |  |  | expired_at    |
+| is_admin      |  |  +----------------+  |  | created_at    |
+| is_member     |  |                      |  +---------------+
+| phone         |  +----------------------+  |
++---------------+                            |
+       ^                                     |
+       |                                     |
++------+---------+                           |
+|  ExportList    |<-------------------------+
++----------------+
+| id             |
+| user_id        |
+| products       |
+| created_at     |
++----------------+
+                             
++-----------------+     +------------------+     +------------------+
+|    Category     |     |     Product      |     |   ProductImage   |
++-----------------+     +------------------+     +------------------+
+| id              |     | id               |     | id               |
+| name            |     | name             |     | product_id       |
+| slug            |     | slug             |     | image            |
+| parent_id       |<-+  | sku              |<-+  | image_url        |
+| description     |  |  | type             |  |  | alt_text         |
+| image           |  |  | status           |  |  | is_featured      |
+| created_at      |  |  | price            |  |  | order            |
+| updated_at      |  |  | categories       |--+  | created_at       |
+| short_name      |  |  | tags             |     +------------------+
++-----------------+  |  | stock_quantity   |
+                     |  | vl_id            |
++---------------+    |  +------------------+
+|     Tag       |<---+           ^
++---------------+                |
+| id            |                |
+| name          |     +----------+-----------+
+| slug          |     |   ProductAttribute   |
++---------------+     +----------------------+
+                      | id                   |
++-----------------+   | product_id           |
+|   Attribute     |<--| attribute_id         |
++-----------------+   | values               |
+| id              |   +----------------------+
+| name            |
+| slug            |     +------------------+
+| description     |<-+  | AttributeValue   |
++-----------------+  |  +------------------+
+                     |  | id               |
+                     |  | attribute_id     |
+                     +--| value            |
+                        | slug             |
+                        +------------------+
+```
 
 ## 3. 核心数据模型
 
@@ -26,6 +84,7 @@ class User(AbstractUser):
     扩展Django内置用户模型
     """
     phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(max_length=100, unique=True)
     is_admin = models.BooleanField(default=False)
     is_member = models.BooleanField(default=True)
     
@@ -81,6 +140,7 @@ class Category(MPTTModel):
     使用Django-MPTT实现树形结构
     """
     name = models.CharField(max_length=100)
+    short_name = models.CharField(max_length=50, blank=True, null=True)
     slug = models.SlugField(max_length=100, unique=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     description = models.TextField(blank=True)
@@ -127,6 +187,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     sku = models.CharField(max_length=100, unique=True)
+    vl_id = models.CharField(max_length=100, blank=True, null=True)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='simple')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     featured = models.BooleanField(default=False)

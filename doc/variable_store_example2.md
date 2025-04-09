@@ -14,6 +14,7 @@ CREATE TABLE products (
   name VARCHAR(255) NOT NULL,
   slug VARCHAR(255) NOT NULL UNIQUE,
   sku VARCHAR(100) NOT NULL UNIQUE,
+  vl_id VARCHAR(100),
   type VARCHAR(20) NOT NULL DEFAULT 'simple',
   status VARCHAR(20) NOT NULL DEFAULT 'draft',
   featured BOOLEAN NOT NULL DEFAULT 0,
@@ -175,6 +176,39 @@ CREATE TABLE variation_attributes (
 );
 ```
 
+### 1.9 用户表 (users)
+
+```sql
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  phone VARCHAR(20),
+  is_admin BOOLEAN NOT NULL DEFAULT 0,
+  is_member BOOLEAN NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+### 1.10 分类表 (categories)
+
+```sql
+CREATE TABLE categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  short_name VARCHAR(50),
+  slug VARCHAR(100) NOT NULL UNIQUE,
+  parent_id INT,
+  description TEXT,
+  image VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+```
+
 ## 2. 示例数据
 
 以下是基于`vSimpleNew2.csv`文件中变体产品的示例数据，展示如何在数据库中存储。
@@ -183,10 +217,10 @@ CREATE TABLE variation_attributes (
 
 ```sql
 INSERT INTO products (
-  name, slug, sku, type, status, featured, catalog_visibility, 
+  name, slug, sku, vl_id, type, status, featured, catalog_visibility, 
   description, stock_status, reviews_allowed
 ) VALUES (
-  'VL-EXCL-DT-056', 'vl-excl-dt-056', 'VL-EXCL-DT-056', 'variable', 
+  'VL-EXCL-DT-056', 'vl-excl-dt-056', 'VL-EXCL-DT-056', 'VL-EXCL-DT-056', 'variable', 
   'published', 0, 'visible', 'VL-EXCL-DT-056', 'instock', 1
 );
 -- 新插入记录的ID: 1
