@@ -3,9 +3,18 @@ import os
 import markdown
 from pathlib import Path
 import logging
+import re
 
 # 获取logger
 logger = logging.getLogger('docs')
+
+# 清理无效Unicode字符的函数
+def clean_unicode_surrogates(text):
+    """清理文本中的Unicode代理对和其他无效字符"""
+    # 清理代理对字符 (Unicode surrogate pairs)
+    text = text.encode('utf-8', 'surrogateescape').decode('utf-8', 'replace')
+    # 替换任何其他无效Unicode字符为问号
+    return re.sub(r'[\uD800-\uDFFF]', '?', text)
 
 # Create your views here.
 
@@ -38,9 +47,12 @@ def document_list(request):
                 logger.debug(f"处理Markdown文件: {file_path}")
                 
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, 'r', encoding='utf-8', errors='surrogateescape') as f:
                         content = f.read()
                         logger.debug(f"成功读取文件: {filename}, 大小: {len(content)} 字节")
+                        
+                        # 清理内容中的无效Unicode字符
+                        content = clean_unicode_surrogates(content)
                         
                         # 转换Markdown为HTML，添加更多扩展支持
                         extensions = [
@@ -52,6 +64,9 @@ def document_list(request):
                         ]
                         html_content = markdown.markdown(content, extensions=extensions)
                         logger.debug(f"Markdown 转换为 HTML 成功: {filename}")
+                    
+                    # 确保HTML内容不包含代理对
+                    html_content = clean_unicode_surrogates(html_content)
                     
                     documents.append({
                         'filename': filename,
