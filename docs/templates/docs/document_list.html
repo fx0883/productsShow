@@ -19,6 +19,9 @@
             --code-bg: #f6f8fa;
             --hover-bg: #ecf5ff;
             --shadow-color: rgba(0, 0, 0, 0.1);
+            --error-bg: #fef0f0;
+            --error-color: #f56c6c;
+            --error-border: #fbc4c4;
         }
         
         [data-theme="dark"] {
@@ -29,12 +32,15 @@
             --border-color: #444;
             --primary-color: #5cadff;
             --primary-bg: #213d5b;
-            --primary-light: #2a4d73;
-            --header-bg: #213d5b;
+            --primary-light: #4b98d3;
+            --header-bg: #1d1d1d;
             --header-color: #e0e0e0;
             --code-bg: #2d2d2d;
             --hover-bg: #213d5b;
             --shadow-color: rgba(0, 0, 0, 0.3);
+            --error-bg: #4d3030;
+            --error-color: #ff9e9e;
+            --error-border: #8b4343;
         }
         
         /* 共享样式 */
@@ -553,6 +559,18 @@
             border: 1px solid var(--border-color);
             overflow: auto;
         }
+        
+        /* 错误消息样式 */
+        .error-message {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+            border: 1px solid var(--error-border);
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -576,6 +594,15 @@
     </header>
     <div class="container">
         <div class="content">
+            <!-- 错误消息显示区域 -->
+            {% if error %}
+            <div class="error-message">
+                <h3>发生错误</h3>
+                <p>{{ error }}</p>
+                <p>请查看服务器日志以获取更多信息。</p>
+            </div>
+            {% endif %}
+            
             <div class="sidebar" id="sidebar">
                 <div class="search-container">
                     <input type="text" class="search-input" id="doc-search" placeholder="搜索文档...">
@@ -592,18 +619,21 @@
             <!-- 添加遮罩层，点击关闭菜单 -->
             <div class="menu-overlay" id="menu-overlay"></div>
             <div class="main-content" id="main-content">
-                {% for doc in documents %}
-                <div id="doc-{{ forloop.counter }}" class="doc-content {% if forloop.first %}active{% endif %}">
-                    <h2>{{ doc.filename }}</h2>
-                    <div class="markdown-content">
-                        {{ doc.content|safe }}
+                {% if documents %}
+                    {% for document in documents %}
+                    <div class="document-item" id="document-{{ forloop.counter }}">
+                        <h2>{{ document.filename }}</h2>
+                        <div class="document-content">{{ document.content|safe }}</div>
                     </div>
-                </div>
-                {% empty %}
-                <div class="doc-content active">
-                    <p>没有找到文档，请确认doc目录中是否包含.md文件。</p>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    {% if not error %}
+                    <div class="document-item">
+                        <h2>没有找到文档</h2>
+                        <p>请确保文档目录中包含.md格式的文件。</p>
+                    </div>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
