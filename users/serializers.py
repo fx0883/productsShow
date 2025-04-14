@@ -14,9 +14,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'phone', 'password', 'password_confirm')
+        fields = ('id', 'username', 'email', 'phone', 'password', 'password_confirm', 'nick_name', 'avatar')
         extra_kwargs = {
-            'email': {'required': True}
+            'email': {'required': True},
+            'nick_name': {'required': False},
+            'avatar': {'required': False}
         }
     
     def validate(self, attrs):
@@ -38,7 +40,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],
-            phone=validated_data.get('phone', '')
+            phone=validated_data.get('phone', ''),
+            nick_name=validated_data.get('nick_name', ''),
+            avatar=validated_data.get('avatar', None)
         )
         
         # 设置密码
@@ -95,7 +99,7 @@ class UserSerializer(serializers.ModelSerializer):
     """用户信息序列化器"""
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'phone', 'is_admin', 'is_member', 'date_joined', 'last_login')
+        fields = ('id', 'username', 'email', 'phone', 'is_admin', 'is_member', 'date_joined', 'last_login', 'nick_name', 'avatar')
         read_only_fields = ('id', 'date_joined', 'last_login')
 
 
@@ -113,9 +117,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'phone', 'is_admin', 'is_member', 
-                 'date_joined', 'last_login', 'profile', 'first_name', 'last_name')
+                 'date_joined', 'last_login', 'profile', 'first_name', 'last_name', 'nick_name', 'avatar')
         read_only_fields = ('id', 'date_joined', 'last_login')
-        
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     """修改密码序列化器"""

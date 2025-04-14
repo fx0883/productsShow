@@ -20,7 +20,8 @@ register_request_example = {
     'email': 'test@example.com',
     'phone': '13800138000',
     'password': 'Secure@Password123',
-    'password_confirm': 'Secure@Password123'
+    'password_confirm': 'Secure@Password123',
+    'nick_name': '测试用户'
 }
 
 register_response_example = {
@@ -36,7 +37,9 @@ register_response_example = {
             'is_admin': False,
             'is_member': True,
             'date_joined': '2025-04-12T13:25:30Z',
-            'last_login': None
+            'last_login': None,
+            'nick_name': '测试用户',
+            'avatar': None
         },
         'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.abcdefghijklmnopqrstuvwxyz',
         'refresh_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.123456789abcdefghijklmnopqrst',
@@ -79,7 +82,9 @@ login_response_example = {
             'is_admin': False,
             'is_member': True,
             'date_joined': '2025-04-12T13:25:30Z',
-            'last_login': '2025-04-12T13:30:45Z'
+            'last_login': '2025-04-12T13:30:45Z',
+            'nick_name': '测试用户',
+            'avatar': 'http://localhost:8000/media/avatars/user1.jpg'
         },
         'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.abcdefghijklmnopqrstuvwxyz',
         'refresh_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.123456789abcdefghijklmnopqrst',
@@ -148,7 +153,9 @@ user_profile_response_example = {
             'date_format': 'YYYY-MM-DD'
         },
         'first_name': '张',
-        'last_name': '三'
+        'last_name': '三',
+        'nick_name': '张三丰',
+        'avatar': 'http://localhost:8000/media/avatars/user1.jpg'
     }
 }
 
@@ -157,6 +164,7 @@ user_profile_update_request_example = {
     'phone': '13900139000',
     'first_name': '李',
     'last_name': '四',
+    'nick_name': '李四方',
     'profile': {
         'preferred_language': 'en-us',
         'date_format': 'MM/DD/YYYY'
@@ -181,7 +189,9 @@ user_profile_update_response_example = {
             'date_format': 'MM/DD/YYYY'
         },
         'first_name': '李',
-        'last_name': '四'
+        'last_name': '四',
+        'nick_name': '李四方',
+        'avatar': 'http://localhost:8000/media/avatars/user1.jpg'
     }
 }
 

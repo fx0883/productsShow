@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -11,6 +12,19 @@ class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
     is_admin = models.BooleanField(default=False)
     is_member = models.BooleanField(default=True)
+    nick_name = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9_\u4e00-\u9fa5]+$',
+                message='昵称只能包含字母、数字、下划线和中文',
+                code='invalid_nickname'
+            )
+        ]
+    )
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     
     class Meta:
         db_table = 'users'
