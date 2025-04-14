@@ -248,7 +248,9 @@ user_list_response_example = {
             'is_admin': True,
             'is_member': False,
             'date_joined': '2025-04-10T10:00:00Z',
-            'last_login': '2025-04-12T13:00:00Z'
+            'last_login': '2025-04-12T13:00:00Z',
+            'nick_name': '系统管理员',
+            'avatar': 'http://localhost:8000/media/avatars/admin.jpg'
         },
         {
             'id': 2,
@@ -258,7 +260,9 @@ user_list_response_example = {
             'is_admin': False,
             'is_member': True,
             'date_joined': '2025-04-11T11:00:00Z',
-            'last_login': '2025-04-12T12:00:00Z'
+            'last_login': '2025-04-12T12:00:00Z',
+            'nick_name': '普通会员',
+            'avatar': 'http://localhost:8000/media/avatars/member1.jpg'
         }
     ],
     'pagination': {
@@ -270,12 +274,14 @@ user_list_response_example = {
 }
 
 create_user_request_example = {
-    'username': 'newmember',
-    'email': 'newmember@example.com',
+    'username': 'newadmin',
+    'email': 'newadmin@example.com',
     'phone': '13700137000',
     'password': 'Secure@Password123',
-    'is_admin': False,
-    'is_member': True
+    'password_confirm': 'Secure@Password123',
+    'is_admin': True,
+    'is_member': False,
+    'nick_name': '新管理员'
 }
 
 create_user_response_example = {
@@ -284,13 +290,15 @@ create_user_response_example = {
     'message': '创建用户成功',
     'data': {
         'id': 3,
-        'username': 'newmember',
-        'email': 'newmember@example.com',
+        'username': 'newadmin',
+        'email': 'newadmin@example.com',
         'phone': '13700137000',
-        'is_admin': False,
-        'is_member': True,
+        'is_admin': True,
+        'is_member': False,
         'date_joined': '2025-04-12T13:45:00Z',
-        'last_login': None
+        'last_login': None,
+        'nick_name': '新管理员',
+        'avatar': None
     }
 }
 
@@ -324,7 +332,9 @@ user_detail_response_example = {
             'date_format': 'YYYY-MM-DD'
         },
         'first_name': '张',
-        'last_name': '三'
+        'last_name': '三',
+        'nick_name': '张三丰',
+        'avatar': 'http://localhost:8000/media/avatars/member1.jpg'
     }
 }
 
@@ -341,7 +351,12 @@ update_user_request_example = {
     'is_admin': False,
     'is_member': True,
     'first_name': '王',
-    'last_name': '五'
+    'last_name': '五',
+    'nick_name': '王五爵',
+    'profile': {
+        'preferred_language': 'en-us',
+        'date_format': 'MM/DD/YYYY'
+    }
 }
 
 update_user_response_example = {
@@ -358,11 +373,13 @@ update_user_response_example = {
         'date_joined': '2025-04-11T11:00:00Z',
         'last_login': '2025-04-12T12:00:00Z',
         'profile': {
-            'preferred_language': 'zh-cn',
-            'date_format': 'YYYY-MM-DD'
+            'preferred_language': 'en-us',
+            'date_format': 'MM/DD/YYYY'
         },
         'first_name': '王',
-        'last_name': '五'
+        'last_name': '五',
+        'nick_name': '王五爵',
+        'avatar': 'http://localhost:8000/media/avatars/member1.jpg'
     }
 }
 

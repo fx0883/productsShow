@@ -551,11 +551,7 @@ class UserManagementAPIView(BaseAPIView):
         },
         auth=[{"Bearer": []}],
         examples=[
-            OpenApiExample(
-                name='获取用户列表请求',
-                value=get_token_auth_header(),
-                request_only=True,
-            )
+            
         ]
     )
     def get(self, request):
@@ -598,11 +594,6 @@ class UserManagementAPIView(BaseAPIView):
             OpenApiExample(
                 name='创建用户请求',
                 value=create_user_request_example,
-                request_only=True,
-            ),
-            OpenApiExample(
-                name='创建用户请求',
-                value=get_token_auth_header(),
                 request_only=True,
             )
         ],
