@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# 密码重置超级密钥
+RESET_PASSWORD_SUPER_KEY = '123456'
 
 # Application definition
 

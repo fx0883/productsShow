@@ -138,3 +138,9 @@ class ChangePasswordSerializer(serializers.Serializer):
 class TokenRefreshSerializer(serializers.Serializer):
     """令牌刷新序列化器"""
     refresh_token = serializers.CharField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """密码重置序列化器"""
+    user_id = serializers.IntegerField(required=True)
+    super_key = serializers.CharField(required=True, write_only=True)

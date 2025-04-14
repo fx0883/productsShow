@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import login, logout
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.conf import settings
 
 # 移除drf-yasg导入
 # from drf_yasg import openapi
@@ -27,7 +28,8 @@ from .serializers import (
     UserDetailSerializer,
     ChangePasswordSerializer,
     UserProfileSerializer,
-    TokenRefreshSerializer
+    TokenRefreshSerializer,
+    ResetPasswordSerializer
 )
 from .authentication import JWTAuthentication, TokenManager
 from .api_examples import *  # 导入API示例数据
@@ -654,11 +656,7 @@ class UserDetailManagementAPIView(BaseAPIView):
         },
         auth=[{"Bearer": []}],
         examples=[
-            OpenApiExample(
-                name='获取用户详情请求',
-                value=get_token_auth_header(),
-                request_only=True,
-            )
+            
         ]
     )
     def get(self, request, user_id):
@@ -678,7 +676,7 @@ class UserDetailManagementAPIView(BaseAPIView):
         tags=['管理员'],
         summary="更新用户",
         description="更新指定用户的信息（管理员接口）",
-        request=UserSerializer,
+        request=UserDetailSerializer,
         responses={
             200: OpenApiResponse(
                 response=UserDetailSerializer,
@@ -720,11 +718,6 @@ class UserDetailManagementAPIView(BaseAPIView):
                 name='更新用户请求',
                 value=update_user_request_example,
                 request_only=True,
-            ),
-            OpenApiExample(
-                name='更新用户请求',
-                value=get_token_auth_header(),
-                request_only=True,
             )
         ],
         auth=[{"Bearer": []}]
@@ -737,7 +730,7 @@ class UserDetailManagementAPIView(BaseAPIView):
             profile_data = user_data.pop('profile', {})
             
             # 更新用户数据
-            user_serializer = UserSerializer(user, data=user_data, partial=True)
+            user_serializer = UserDetailSerializer(user, data=user_data, partial=True)
             if user_serializer.is_valid():
                 user_serializer.save()
                 
@@ -920,3 +913,105 @@ class UserDetailUpdateAPIView(BaseAPIView):
             return self.error(message=serializer.errors, code=1017)
         except User.DoesNotExist:
             return self.error(message="用户不存在", code=1018)
+
+
+class ResetPasswordAPIView(BaseAPIView):
+    """密码重置API - 使用超级密钥"""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    
+    @extend_schema(
+        tags=['工具'],
+        summary="重置用户密码",
+        description="使用超级密钥重置指定用户的密码为默认密码(123456)",
+        request=ResetPasswordSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="重置成功",
+                examples=[
+                    OpenApiExample(
+                        name='成功响应',
+                        value=reset_password_response_example,
+                        status_codes=['200'],
+                        response_only=True,
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="超级密钥不正确",
+                examples=[
+                    OpenApiExample(
+                        name='错误响应',
+                        value=reset_password_400_example,
+                        status_codes=['400'],
+                        response_only=True,
+                    )
+                ]
+            ),
+            404: OpenApiResponse(
+                description="用户不存在",
+                examples=[
+                    OpenApiExample(
+                        name='错误响应',
+                        value=reset_password_404_example,
+                        status_codes=['404'],
+                        response_only=True,
+                    )
+                ]
+            )
+        },
+        examples=[
+            OpenApiExample(
+                name='重置密码请求',
+                value=reset_password_request_example,
+                request_only=True,
+            )
+        ]
+    )
+    def post(self, request):
+        """处理密码重置请求"""
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            # 验证超级密钥
+            super_key = serializer.validated_data['super_key']
+            if super_key != settings.RESET_PASSWORD_SUPER_KEY:
+                return self.error(
+                    message="超级密钥不正确",
+                    code=1011,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 查找用户
+            user_id = serializer.validated_data['user_id']
+            try:
+                user = User.objects.get(id=user_id)
+                
+                # 重置密码为默认值
+                default_password = '123456'
+                user.set_password(default_password)
+                user.save()
+                
+                # 使所有现有令牌失效
+                TokenManager.invalidate_user_tokens(user)
+                
+                return self.success(
+                    data={
+                        'user_id': user.id,
+                        'username': user.username
+                    },
+                    message=f"密码重置成功，新密码为: {default_password}"
+                )
+                
+            except User.DoesNotExist:
+                return self.error(
+                    message="用户不存在",
+                    code=4041,
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+                
+        return self.error(
+            data=serializer.errors,
+            message="密码重置失败，请检查输入",
+            code=1012,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )

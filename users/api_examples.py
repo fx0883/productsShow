@@ -412,3 +412,33 @@ delete_user_404_example = {
     'message': '用户不存在',
     'data': None
 }
+
+# 密码重置API示例
+reset_password_request_example = {
+    'user_id': 2,
+    'super_key': '123456'
+}
+
+reset_password_response_example = {
+    'success': True,
+    'code': 2000,
+    'message': '密码重置成功，新密码为: 123456',
+    'data': {
+        'user_id': 2,
+        'username': 'member1'
+    }
+}
+
+reset_password_400_example = {
+    'success': False,
+    'code': 1011,
+    'message': '超级密钥不正确',
+    'data': None
+}
+
+reset_password_404_example = {
+    'success': False,
+    'code': 4041,
+    'message': '用户不存在',
+    'data': None
+}

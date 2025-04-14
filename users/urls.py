@@ -20,4 +20,7 @@ urlpatterns = [
     # 用户管理接口 (管理员)
     path('admin/users/', views.UserManagementAPIView.as_view(), name='manage_users'),
     path('admin/users/<int:user_id>/', views.UserDetailManagementAPIView.as_view(), name='manage_user_detail'),
+    
+    # 工具接口
+    path('tools/reset-password/', views.ResetPasswordAPIView.as_view(), name='reset_password'),
 ]
