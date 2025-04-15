@@ -28,10 +28,25 @@ class IsAdminUser(BasePermission):
         if not request.user.is_authenticated:
             raise PermissionException(message="请先登录")
             
-        if request.user.is_admin:
+        if request.user.is_admin or request.user.is_super_admin:
             return True
             
         raise PermissionException(message="需要管理员权限")
+
+
+class IsSuperAdminUser(BasePermission):
+    """
+    超级管理员权限
+    """
+    
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            raise PermissionException(message="请先登录")
+            
+        if request.user.is_super_admin:
+            return True
+            
+        raise PermissionException(message="需要超级管理员权限")
 
 
 class IsMember(BasePermission):

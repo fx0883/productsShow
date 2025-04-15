@@ -442,3 +442,81 @@ reset_password_404_example = {
     'message': '用户不存在',
     'data': None
 }
+
+# 重置密码错误响应示例
+reset_password_404_example = {
+    "success": False,
+    "code": 1012,
+    "message": "用户不存在",
+    "data": None
+}
+
+# 用户租户分配请求示例
+user_tenant_assign_request_example = {
+    "user_id": 2,
+    "tenant_id": 3
+}
+
+# 用户租户分配成功响应示例
+user_tenant_assign_response_example = {
+    "success": True,
+    "code": 2000,
+    "message": "用户租户分配成功",
+    "data": {
+        "user_id": 2,
+        "username": "member1",
+        "tenant_id": 3,
+        "tenant_name": "测试租户"
+    }
+}
+
+# 用户租户分配错误响应示例
+user_tenant_assign_400_example = {
+    "success": False,
+    "code": 1010,
+    "message": "用户租户分配失败",
+    "data": {
+        "user_id": ["用户不存在"],
+        "tenant_id": ["租户不存在"]
+    }
+}
+
+# 租户用户创建请求示例
+tenant_user_create_request_example = {
+    "username": "tenant_user1",
+    "email": "tenant_user1@example.com",
+    "password": "password123",
+    "password_confirm": "password123",
+    "phone": "13812345678",
+    "nick_name": "租户用户1",
+    "is_admin": False,
+    "is_member": True
+}
+
+# 租户用户创建成功响应示例
+tenant_user_create_response_example = {
+    "success": True,
+    "code": 2000,
+    "message": "用户创建成功",
+    "data": {
+        "user_id": 5,
+        "username": "tenant_user1",
+        "email": "tenant_user1@example.com",
+        "is_admin": False,
+        "is_member": True,
+        "tenant_id": 2,
+        "tenant_name": "测试租户"
+    }
+}
+
+# 租户用户创建错误响应示例
+tenant_user_create_400_example = {
+    "success": False,
+    "code": 1017,
+    "message": "用户创建失败",
+    "data": {
+        "username": ["该用户名已存在"],
+        "email": ["该邮箱已被注册"],
+        "password_confirm": ["两次密码输入不一致"]
+    }
+}

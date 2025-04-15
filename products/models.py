@@ -1,8 +1,9 @@
 from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from users.models import User
+from common.models import BaseModel, Tenant
 
-class Category(MPTTModel):
+class Category(MPTTModel, BaseModel):
     """
     产品分类，支持多级分类
     使用Django-MPTT实现树形结构
@@ -28,7 +29,7 @@ class Category(MPTTModel):
         return self.name
 
 
-class Tag(models.Model):
+class Tag(BaseModel):
     """
     产品标签
     """
@@ -36,7 +37,7 @@ class Tag(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'tags'
         verbose_name = '标签'
         verbose_name_plural = '标签'
@@ -45,7 +46,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Product(models.Model):
+class Product(BaseModel):
     """
     产品基本信息
     """
@@ -107,7 +108,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'products'
         verbose_name = '产品'
         verbose_name_plural = '产品'
@@ -117,7 +118,7 @@ class Product(models.Model):
         return self.name
 
 
-class ProductImage(models.Model):
+class ProductImage(BaseModel):
     """
     产品图片
     """
@@ -127,19 +128,18 @@ class ProductImage(models.Model):
     alt_text = models.CharField(max_length=255, blank=True)
     is_featured = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'product_images'
         verbose_name = '产品图片'
         verbose_name_plural = '产品图片'
         ordering = ['order']
-        
+    
     def __str__(self):
-        return f"Image for {self.product.name} ({self.id})"
+        return f"{self.product.name}的图片{self.id}"
 
 
-class Attribute(models.Model):
+class Attribute(BaseModel):
     """
     产品属性定义，例如"颜色"、"尺寸"等
     """
@@ -147,19 +147,17 @@ class Attribute(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     has_predefined_values = models.BooleanField(default=True, help_text="是否有预定义的可选值")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'attributes'
         verbose_name = '属性'
         verbose_name_plural = '属性'
-        
+    
     def __str__(self):
         return self.name
 
 
-class AttributeValue(models.Model):
+class AttributeValue(BaseModel):
     """
     属性的可选值，例如颜色属性的"红色"、"蓝色"等
     """
@@ -169,18 +167,18 @@ class AttributeValue(models.Model):
     description = models.TextField(blank=True)
     sort_order = models.IntegerField(default=0)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'attribute_values'
         verbose_name = '属性值'
         verbose_name_plural = '属性值'
         unique_together = ('attribute', 'slug')
         ordering = ['sort_order']
-        
+    
     def __str__(self):
         return f"{self.attribute.name}: {self.name}"
 
 
-class ProductAttribute(models.Model):
+class ProductAttribute(BaseModel):
     """
     产品与属性的关联，定义产品的哪些属性可用于变体
     """
@@ -188,7 +186,7 @@ class ProductAttribute(models.Model):
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
     used_for_variations = models.BooleanField(default=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'product_attributes'
         verbose_name = '产品属性'
         verbose_name_plural = '产品属性'
@@ -198,7 +196,7 @@ class ProductAttribute(models.Model):
         return f"{self.product.name} - {self.attribute.name}"
 
 
-class ProductVariation(models.Model):
+class ProductVariation(BaseModel):
     """
     产品变体，例如不同颜色、尺寸的同款产品
     """
@@ -221,20 +219,18 @@ class ProductVariation(models.Model):
     image = models.ForeignKey(ProductImage, on_delete=models.SET_NULL, null=True, blank=True, related_name='variations')
     is_default = models.BooleanField(default=False)
     sort_order = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'product_variations'
         verbose_name = '产品变体'
         verbose_name_plural = '产品变体'
         ordering = ['sort_order']
-        
+    
     def __str__(self):
-        return f"{self.product.name} - {self.name or self.sku}"
+        return f"{self.product.name} - {self.name or self.id}"
 
 
-class VariationAttribute(models.Model):
+class VariationAttribute(BaseModel):
     """
     变体与属性值的关联
     """
@@ -242,11 +238,11 @@ class VariationAttribute(models.Model):
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
     value = models.ForeignKey(AttributeValue, on_delete=models.CASCADE)
     
-    class Meta:
+    class Meta(BaseModel.Meta):
         db_table = 'variation_attributes'
         verbose_name = '变体属性'
         verbose_name_plural = '变体属性'
         unique_together = ('variation', 'attribute')
-        
+    
     def __str__(self):
-        return f"{self.variation.sku} - {self.attribute.name}: {self.value.name}"
+        return f"{self.variation} - {self.attribute.name}: {self.value.name}"

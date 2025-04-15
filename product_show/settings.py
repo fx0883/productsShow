@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'common.middleware.APIResponseMiddleware',  # 自定义响应中间件
+    'common.tenant_middleware.TenantMiddleware',  # 租户中间件
 ]
 
 ROOT_URLCONF = 'product_show.urls'

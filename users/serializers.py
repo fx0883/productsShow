@@ -144,3 +144,67 @@ class ResetPasswordSerializer(serializers.Serializer):
     """密码重置序列化器"""
     user_id = serializers.IntegerField(required=True)
     super_key = serializers.CharField(required=True, write_only=True)
+
+
+class UserTenantAssignSerializer(serializers.Serializer):
+    """用户租户分配序列化器"""
+    user_id = serializers.IntegerField(required=True)
+    tenant_id = serializers.IntegerField(required=True)
+    
+    def validate_user_id(self, value):
+        """验证用户ID"""
+        from users.models import User
+        
+        try:
+            User.objects.get(id=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("用户不存在")
+        return value
+    
+    def validate_tenant_id(self, value):
+        """验证租户ID"""
+        from common.models import Tenant
+        
+        try:
+            Tenant.objects.get(id=value)
+        except Tenant.DoesNotExist:
+            raise serializers.ValidationError("租户不存在")
+        return value
+
+
+class TenantUserCreateSerializer(serializers.ModelSerializer):
+    """租户内用户创建序列化器"""
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'password_confirm', 'phone', 'nick_name', 'is_admin', 'is_member']
+        extra_kwargs = {
+            'email': {'required': True},
+            'username': {'required': True},
+        }
+        
+    def validate(self, attrs):
+        """
+        验证密码匹配和唯一性约束
+        """
+        # 验证密码是否匹配
+        if attrs.get('password') != attrs.get('password_confirm'):
+            raise serializers.ValidationError({"password_confirm": "两次密码输入不一致"})
+            
+        # 验证用户名唯一性
+        username = attrs.get('username')
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({"username": "该用户名已存在"})
+            
+        # 验证邮箱唯一性
+        email = attrs.get('email')
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({"email": "该邮箱已被注册"})
+        
+        # 删除password_confirm字段
+        if 'password_confirm' in attrs:
+            del attrs['password_confirm']
+            
+        return attrs

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from common.models import Tenant  # 导入Tenant模型
 
 # Create your models here.
 
@@ -12,6 +13,17 @@ class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
     is_admin = models.BooleanField(default=False)
     is_member = models.BooleanField(default=True)
+    # 添加租户字段，默认为NULL，但会通过迁移脚本为现有用户设置为租户ID 1
+    tenant = models.ForeignKey(
+        Tenant, 
+        on_delete=models.CASCADE, 
+        related_name='users',
+        verbose_name='租户',
+        null=True,  # 允许为空，便于迁移现有数据
+        db_index=True
+    )
+    # 新增超级管理员标志，用于标识可以管理所有租户的超级管理员
+    is_super_admin = models.BooleanField(default=False, verbose_name='超级管理员')
     nick_name = models.CharField(
         max_length=50, 
         blank=True, 

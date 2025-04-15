@@ -40,6 +40,9 @@ urlpatterns = [
     # 用户模块
     path(f'{API_V1_PREFIX}users/', include('users.urls')),
     
+    # 通用模块（包含租户管理）
+    path(f'{API_V1_PREFIX}common/', include('common.urls')),
+    
     # 其他应用
     path('doclist/', include('docs.urls')),  # 文档应用路径改为/doclist
     

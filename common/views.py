@@ -125,3 +125,8 @@ class BaseDestroyAPIView(DestroyAPIView):
 class BaseListCreateAPIView(ListCreateAPIView):
     """列表创建视图基类"""
     pagination_class = StandardPagination
+
+
+class BaseRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """详情更新删除视图基类"""
+    pass

@@ -148,6 +148,145 @@ class UserToken(models.Model):
 4. 处理产品关联数据（分类、属性、变体等）
 5. 返回导入结果报告
 
+## 多租户系统
+
+项目实现了完整的多租户架构，支持在同一应用实例中隔离不同租户的数据。
+
+### 多租户架构设计
+
+系统采用共享数据库、共享架构(Shared Database, Shared Schema)的多租户架构模式：
+
+1. **核心模型**
+   - `Tenant` - 租户模型，存储租户基本信息和状态
+   - `TenantQuota` - 租户配额模型，限制租户资源使用
+   - `BaseModel` - 抽象基础模型，所有需要租户隔离的业务模型都应继承此类
+
+2. **数据隔离机制**
+   - `TenantManager` - 自动根据当前租户上下文过滤查询结果
+   - `TenantMiddleware` - 设置和管理请求的租户上下文
+   - 线程本地存储 - 在请求处理过程中保存当前租户信息
+
+3. **权限控制**
+   - `IsSuperAdminUser` - 超级管理员权限检查
+   - `IsAdminUser` - 租户管理员权限检查（包括超级管理员）
+   - 三级角色体系：超级管理员、租户管理员、普通用户
+
+### 如何在业务模型中使用多租户功能
+
+为了在新的业务模型中实现租户隔离，需要遵循以下步骤：
+
+1. **继承BaseModel**
+
+```python
+from common.models import BaseModel
+
+class YourBusinessModel(BaseModel):
+    # 自定义字段...
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    # ...
+```
+
+2. **使用默认管理器进行查询**
+
+```python
+# 这将自动按当前租户过滤结果
+items = YourBusinessModel.objects.all()
+
+# 超级管理员访问所有租户数据时使用
+all_items = YourBusinessModel.original_objects.all()
+```
+
+3. **在创建对象时自动关联租户**
+
+新对象会自动关联到当前租户上下文：
+
+```python
+# 无需手动指定tenant，会自动使用当前租户上下文
+new_item = YourBusinessModel.objects.create(
+    name="示例名称",
+    description="示例描述"
+)
+```
+
+### 租户API
+
+系统提供了完整的租户管理API：
+
+1. **租户管理** (仅限超级管理员)
+   - `GET /api/v1/common/tenants/` - 获取所有租户列表
+   - `POST /api/v1/common/tenants/` - 创建新租户
+   - `GET /api/v1/common/tenants/{id}/` - 获取租户详情
+   - `PUT /api/v1/common/tenants/{id}/` - 更新租户信息
+   - `DELETE /api/v1/common/tenants/{id}/` - 删除租户
+
+2. **租户用户管理**
+   - `GET /api/v1/common/tenants/users/` - 获取租户用户列表
+   - `POST /api/v1/users/tenant/users/create/` - 在租户中创建用户
+
+3. **租户配额管理** (仅限超级管理员)
+   - `GET /api/v1/common/tenants/quota/` - 获取租户配额信息
+   - `PUT /api/v1/common/tenants/quota/` - 更新租户配额设置
+
+### API文档和示例
+
+多租户系统的所有API都有详细的OpenAPI文档和示例：
+
+1. **示例文件结构**
+   - `users/api_examples.py` - 用户相关API示例
+   - `common/api_examples.py` - 租户相关API示例
+
+2. **使用示例创建新API**
+
+```python
+# 1. 在api_examples.py中定义示例
+tenant_list_response_example = {
+    "success": True,
+    "code": 2000,
+    "message": "获取租户列表成功",
+    "data": [
+        # 示例数据...
+    ]
+}
+
+# 2. 在API视图中使用示例
+@extend_schema(
+    tags=['租户管理'],
+    summary="获取租户列表",
+    responses={
+        200: OpenApiResponse(
+            description="成功响应",
+            examples=[
+                OpenApiExample(
+                    name='成功响应',
+                    value=tenant_list_response_example,
+                    status_codes=['200'],
+                    response_only=True,
+                )
+            ]
+        ),
+    }
+)
+def get(self, request):
+    # API实现...
+```
+
+### 超级管理员创建
+
+系统提供了管理命令以创建超级管理员：
+
+```bash
+python manage.py create_super_admin --username admin --password password --email admin@example.com [--tenant "租户名称"]
+```
+
+参数说明:
+- `--username`: 用户名（必填）
+- `--password`: 密码（必填）
+- `--email`: 电子邮箱（必填）
+- `--nick_name`: 昵称（可选）
+- `--phone`: 手机号码（可选）
+- `--tenant`: 关联租户名称（可选）
+
 ## 开发规范
 
 ### 代码风格

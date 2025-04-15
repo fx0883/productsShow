@@ -23,4 +23,8 @@ urlpatterns = [
     
     # 工具接口
     path('tools/reset-password/', views.ResetPasswordAPIView.as_view(), name='reset_password'),
+    path('tools/assign-tenant/', views.UserTenantAssignAPIView.as_view(), name='assign_tenant'),
+    
+    # 租户管理接口
+    path('tenant/users/create/', views.TenantUserCreateAPIView.as_view(), name='tenant_user_create'),
 ]
