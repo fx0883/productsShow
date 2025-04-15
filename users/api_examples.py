@@ -26,7 +26,7 @@ register_request_example = {
 
 register_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 201,
     'message': '注册成功',
     'data': {
         'user': {
@@ -49,7 +49,7 @@ register_response_example = {
 
 register_400_example = {
     'success': False,
-    'code': 1001,
+    'code': 400,
     'message': '注册失败，请检查输入',
     'data': {
         'username': ['该用户名已存在'],
@@ -71,7 +71,7 @@ login_with_email_example = {
 
 login_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '登录成功',
     'data': {
         'user': {
@@ -94,7 +94,7 @@ login_response_example = {
 
 login_400_example = {
     'success': False,
-    'code': 1002,
+    'code': 400,
     'message': '登录失败，请检查用户名和密码',
     'data': {
         'non_field_errors': ['用户名或密码错误']
@@ -104,7 +104,7 @@ login_400_example = {
 # 登出API示例
 logout_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '登出成功',
     'data': None
 }
@@ -116,7 +116,7 @@ refresh_token_request_example = {
 
 refresh_token_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '令牌刷新成功',
     'data': {
         'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.new_access_token_xyz',
@@ -127,7 +127,7 @@ refresh_token_response_example = {
 
 refresh_token_400_example = {
     'success': False,
-    'code': 1003,
+    'code': 400,
     'message': '令牌刷新失败',
     'data': {
         'refresh_token': ['无效的刷新令牌']
@@ -137,7 +137,7 @@ refresh_token_400_example = {
 # 用户资料API示例
 user_profile_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '获取用户资料成功',
     'data': {
         'id': 1,
@@ -173,7 +173,7 @@ user_profile_update_request_example = {
 
 user_profile_update_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '更新用户资料成功',
     'data': {
         'id': 1,
@@ -197,7 +197,7 @@ user_profile_update_response_example = {
 
 user_profile_update_400_example = {
     'success': False,
-    'code': 1005,
+    'code': 400,
     'message': '更新用户资料失败',
     'data': {
         'username': ['该用户名已被占用'],
@@ -214,7 +214,7 @@ change_password_request_example = {
 
 change_password_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '密码修改成功',
     'data': {
         'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MTYxMjM1MzAsImlhdCI6MTcxNjEyMzUzMH0.abcdefghijklmnopqrstuvwxyz',
@@ -225,7 +225,7 @@ change_password_response_example = {
 
 change_password_400_example = {
     'success': False,
-    'code': 1004,
+    'code': 400,
     'message': '密码修改失败',
     'data': {
         'old_password': ['密码不正确'],
@@ -237,7 +237,7 @@ change_password_400_example = {
 # 用户管理API示例（管理员）
 user_list_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '获取用户列表成功',
     'data': [
         {
@@ -286,7 +286,7 @@ create_user_request_example = {
 
 create_user_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 201,
     'message': '创建用户成功',
     'data': {
         'id': 3,
@@ -304,7 +304,7 @@ create_user_response_example = {
 
 create_user_400_example = {
     'success': False,
-    'code': 1006,
+    'code': 400,
     'message': '创建用户失败',
     'data': {
         'username': ['该用户名已存在'],
@@ -316,7 +316,7 @@ create_user_400_example = {
 # 用户详情API示例（管理员）
 user_detail_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '获取用户详情成功',
     'data': {
         'id': 2,
@@ -340,7 +340,7 @@ user_detail_response_example = {
 
 user_detail_404_example = {
     'success': False,
-    'code': 4041,
+    'code': 404,
     'message': '用户不存在',
     'data': None
 }
@@ -361,7 +361,7 @@ update_user_request_example = {
 
 update_user_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '更新用户成功',
     'data': {
         'id': 2,
@@ -385,14 +385,14 @@ update_user_response_example = {
 
 update_user_404_example = {
     'success': False,
-    'code': 4041,
+    'code': 404,
     'message': '用户不存在',
     'data': None
 }
 
 update_user_400_example = {
     'success': False,
-    'code': 1007,
+    'code': 400,
     'message': '更新用户失败',
     'data': {
         'username': ['该用户名已被占用']
@@ -401,14 +401,14 @@ update_user_400_example = {
 
 delete_user_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '删除用户成功',
     'data': None
 }
 
 delete_user_404_example = {
     'success': False,
-    'code': 4041,
+    'code': 404,
     'message': '用户不存在',
     'data': None
 }
@@ -421,7 +421,7 @@ reset_password_request_example = {
 
 reset_password_response_example = {
     'success': True,
-    'code': 2000,
+    'code': 200,
     'message': '密码重置成功，新密码为: 123456',
     'data': {
         'user_id': 2,
@@ -431,14 +431,14 @@ reset_password_response_example = {
 
 reset_password_400_example = {
     'success': False,
-    'code': 1011,
+    'code': 400,
     'message': '超级密钥不正确',
     'data': None
 }
 
 reset_password_404_example = {
     'success': False,
-    'code': 4041,
+    'code': 404,
     'message': '用户不存在',
     'data': None
 }
@@ -446,7 +446,7 @@ reset_password_404_example = {
 # 重置密码错误响应示例
 reset_password_404_example = {
     "success": False,
-    "code": 1012,
+    "code": 404,
     "message": "用户不存在",
     "data": None
 }
@@ -460,7 +460,7 @@ user_tenant_assign_request_example = {
 # 用户租户分配成功响应示例
 user_tenant_assign_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "用户租户分配成功",
     "data": {
         "user_id": 2,
@@ -473,7 +473,7 @@ user_tenant_assign_response_example = {
 # 用户租户分配错误响应示例
 user_tenant_assign_400_example = {
     "success": False,
-    "code": 1010,
+    "code": 400,
     "message": "用户租户分配失败",
     "data": {
         "user_id": ["用户不存在"],
@@ -496,7 +496,7 @@ tenant_user_create_request_example = {
 # 租户用户创建成功响应示例
 tenant_user_create_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 201,
     "message": "用户创建成功",
     "data": {
         "user_id": 5,
@@ -512,7 +512,7 @@ tenant_user_create_response_example = {
 # 租户用户创建错误响应示例
 tenant_user_create_400_example = {
     "success": False,
-    "code": 1017,
+    "code": 400,
     "message": "用户创建失败",
     "data": {
         "username": ["该用户名已存在"],

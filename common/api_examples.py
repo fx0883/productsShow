@@ -5,7 +5,7 @@
 # 租户列表请求示例
 tenant_list_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "获取租户列表成功",
     "data": [
         {
@@ -34,7 +34,7 @@ tenant_create_request_example = {
 # 租户创建成功响应示例
 tenant_create_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 201,
     "message": "租户创建成功",
     "data": {
         "name": "新租户",
@@ -45,7 +45,7 @@ tenant_create_response_example = {
 # 租户创建失败响应示例
 tenant_create_400_example = {
     "success": False,
-    "code": 1012,
+    "code": 400,
     "message": "租户创建失败",
     "data": {
         "name": ["租户名称已存在"]
@@ -55,7 +55,7 @@ tenant_create_400_example = {
 # 租户详情响应示例
 tenant_detail_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "获取租户详情成功",
     "data": {
         "id": 1,
@@ -94,7 +94,7 @@ tenant_update_request_example = {
 # 租户更新成功响应示例
 tenant_update_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "租户更新成功",
     "data": {
         "id": 1,
@@ -108,7 +108,7 @@ tenant_update_response_example = {
 # 租户更新失败响应示例
 tenant_update_400_example = {
     "success": False,
-    "code": 1012,
+    "code": 400,
     "message": "租户更新失败",
     "data": {
         "name": ["租户名称已存在"]
@@ -118,7 +118,7 @@ tenant_update_400_example = {
 # 租户删除成功响应示例
 tenant_delete_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 204,
     "message": "租户删除成功",
     "data": None
 }
@@ -126,7 +126,7 @@ tenant_delete_response_example = {
 # 租户不存在响应示例
 tenant_not_found_example = {
     "success": False,
-    "code": 1013,
+    "code": 404,
     "message": "租户不存在",
     "data": None
 }
@@ -134,7 +134,7 @@ tenant_not_found_example = {
 # 租户用户列表响应示例
 tenant_user_list_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "获取租户用户列表成功",
     "data": {
         "tenant": {
@@ -166,7 +166,7 @@ tenant_user_list_response_example = {
 # 租户用户列表查询错误响应示例
 tenant_user_list_400_example = {
     "success": False,
-    "code": 1018,
+    "code": 400,
     "message": "超级管理员必须指定租户ID",
     "data": None
 }
@@ -183,7 +183,7 @@ tenant_quota_request_example = {
 # 租户配额信息响应示例
 tenant_quota_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "获取租户配额成功",
     "data": {
         "id": 1,
@@ -202,7 +202,7 @@ tenant_quota_response_example = {
 # 租户配额更新成功响应示例
 tenant_quota_update_response_example = {
     "success": True,
-    "code": 2000,
+    "code": 200,
     "message": "更新租户配额成功",
     "data": {
         "id": 1,
@@ -221,7 +221,7 @@ tenant_quota_update_response_example = {
 # 租户配额更新失败响应示例
 tenant_quota_update_400_example = {
     "success": False,
-    "code": 1016,
+    "code": 400,
     "message": "参数错误",
     "data": {
         "max_users": ["此字段是必须的。"],

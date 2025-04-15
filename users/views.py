@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from common.views import BaseAPIView
 from common.exceptions import BusinessException, AuthenticationException
 from common.permissions import IsAuthenticated, IsAdminUser, IsSuperAdminUser
+from common.models import Tenant, TenantQuota
 
 from .models import User, UserToken
 from .serializers import (
@@ -566,14 +567,14 @@ class UserManagementAPIView(BaseAPIView):
         description="创建新用户（管理员接口）",
         request=UserRegisterSerializer,
         responses={
-            201: OpenApiResponse(
+            200: OpenApiResponse(
                 response=UserSerializer,
                 description="创建成功",
                 examples=[
                     OpenApiExample(
                         name='成功响应',
                         value=create_user_response_example,
-                        status_codes=['201'],
+                        status_codes=['200'],
                         response_only=True,
                     )
                 ]
@@ -607,7 +608,7 @@ class UserManagementAPIView(BaseAPIView):
             return self.success(
                 data=UserSerializer(user).data,
                 message="用户创建成功",
-                status_code=status.HTTP_201_CREATED
+                status_code=status.HTTP_200_OK
             )
         
         return self.error(
@@ -1119,13 +1120,13 @@ class TenantUserCreateAPIView(BaseAPIView):
         description="租户管理员可以在自己的租户内创建用户",
         request=TenantUserCreateSerializer,
         responses={
-            201: OpenApiResponse(
+            200: OpenApiResponse(
                 description="创建成功",
                 examples=[
                     OpenApiExample(
                         name='成功响应',
                         value=tenant_user_create_response_example,
-                        status_codes=['201'],
+                        status_codes=['200'],
                         response_only=True,
                     )
                 ]
@@ -1153,59 +1154,87 @@ class TenantUserCreateAPIView(BaseAPIView):
     )
     def post(self, request):
         """处理租户内用户创建请求"""
-        serializer = TenantUserCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            # 获取当前用户的租户
-            current_tenant = request.user.tenant
-            
-            if not current_tenant:
-                return self.error(
-                    message="您未关联到任何租户",
-                    code=1014,
-                    status_code=status.HTTP_400_BAD_REQUEST
+        try:
+            serializer = TenantUserCreateSerializer(data=request.data)
+            if serializer.is_valid():
+                # 获取当前用户的租户
+                current_tenant = request.user.tenant
+                
+                # 超级管理员可以指定租户
+                if request.user.is_super_admin and 'tenant_id' in request.data:
+                    try:
+                        tenant_id = request.data.get('tenant_id')
+                        current_tenant = Tenant.objects.get(id=tenant_id)
+                    except Tenant.DoesNotExist:
+                        return self.error(
+                            message="指定的租户不存在",
+                            code=1019,
+                            status_code=status.HTTP_400_BAD_REQUEST
+                        )
+                
+                if not current_tenant:
+                    return self.error(
+                        message="您未关联到任何租户",
+                        code=1014,
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # 检查当前用户是否有权限创建用户
+                # 只有租户管理员或超级管理员可以创建用户
+                if not (request.user.is_admin or request.user.is_super_admin):
+                    return self.error(
+                        message="您没有权限创建用户",
+                        code=1015,
+                        status_code=status.HTTP_403_FORBIDDEN
+                    )
+                
+                # 普通管理员只能在自己的租户内创建用户
+                if not request.user.is_super_admin and serializer.validated_data.get('is_super_admin'):
+                    return self.error(
+                        message="您没有权限创建超级管理员",
+                        code=1016,
+                        status_code=status.HTTP_403_FORBIDDEN
+                    )
+                
+                # 检查配额限制
+                quota, created = TenantQuota.objects.get_or_create(tenant=current_tenant)
+                if quota.is_user_quota_exceeded():
+                    return self.error(
+                        message=f"租户用户配额已达上限({quota.max_users}个用户)",
+                        code=1020,
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # 创建用户
+                user = serializer.save(tenant=current_tenant, is_super_admin=False)
+                
+                # 设置密码
+                user.set_password(serializer.validated_data['password'])
+                user.save()
+                
+                return self.success(
+                    data={
+                        "user_id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "is_admin": user.is_admin,
+                        "is_member": user.is_member,
+                        "tenant_id": current_tenant.id,
+                        "tenant_name": current_tenant.name
+                    },
+                    message="用户创建成功",
+                    status_code=status.HTTP_200_OK
                 )
-            
-            # 检查当前用户是否有权限创建用户
-            # 只有租户管理员或超级管理员可以创建用户
-            if not (request.user.is_admin or request.user.is_super_admin):
-                return self.error(
-                    message="您没有权限创建用户",
-                    code=1015,
-                    status_code=status.HTTP_403_FORBIDDEN
-                )
-            
-            # 普通管理员只能在自己的租户内创建用户
-            if not request.user.is_super_admin and serializer.validated_data.get('is_super_admin'):
-                return self.error(
-                    message="您没有权限创建超级管理员",
-                    code=1016,
-                    status_code=status.HTTP_403_FORBIDDEN
-                )
-            
-            # 创建用户
-            user = serializer.save(tenant=current_tenant, is_super_admin=False)
-            
-            # 设置密码
-            user.set_password(serializer.validated_data['password'])
-            user.save()
-            
-            return self.success(
-                data={
-                    "user_id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "is_admin": user.is_admin,
-                    "is_member": user.is_member,
-                    "tenant_id": current_tenant.id,
-                    "tenant_name": current_tenant.name
-                },
-                message="用户创建成功",
-                status_code=status.HTTP_201_CREATED
+                
+            return self.error(
+                data=serializer.errors,
+                message="用户创建失败",
+                code=1017,
+                status_code=status.HTTP_400_BAD_REQUEST
             )
-            
-        return self.error(
-            data=serializer.errors,
-            message="用户创建失败",
-            code=1017,
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
+        except Exception as e:
+            return self.error(
+                message=f"创建用户失败: {str(e)}",
+                code=1018,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )

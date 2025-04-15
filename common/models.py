@@ -40,6 +40,7 @@ class Tenant(models.Model):
     status = models.CharField(_("状态"), max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
+    is_deleted = models.BooleanField(_("是否删除"), default=False)
     
     class Meta:
         db_table = 'tenants'

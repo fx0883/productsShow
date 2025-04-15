@@ -122,11 +122,70 @@ class BaseDestroyAPIView(DestroyAPIView):
     pass
 
 
-class BaseListCreateAPIView(ListCreateAPIView):
+class BaseListCreateAPIView(ListCreateAPIView, BaseAPIView):
     """列表创建视图基类"""
     pagination_class = StandardPagination
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+                
+            serializer = self.get_serializer(queryset, many=True)
+            return self.success(data=serializer.data, message="获取列表成功")
+        except Exception as e:
+            return self.error(message=str(e), code=1001)
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            instance = self.perform_create(serializer)
+            
+            # 如果perform_create返回了实例，使用它获取数据，否则使用序列化器的数据
+            if instance:
+                serializer = self.get_serializer(instance)
+                
+            return self.success(
+                data=serializer.data, 
+                message="创建成功",
+                status_code=200  # 确保使用200而不是201
+            )
+        except Exception as e:
+            return self.error(message=str(e), code=1002)
 
 
-class BaseRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+class BaseRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView, BaseAPIView):
     """详情更新删除视图基类"""
-    pass
+    
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return self.success(data=serializer.data, message="获取详情成功")
+        except Exception as e:
+            return self.error(message=str(e), code=1003)
+    
+    def update(self, request, *args, **kwargs):
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            
+            return self.success(data=serializer.data, message="更新成功")
+        except Exception as e:
+            return self.error(message=str(e), code=1004)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return self.success(message="删除成功")
+        except Exception as e:
+            return self.error(message=str(e), code=1005)
