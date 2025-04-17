@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'products',
     'exports',
     'imports',
+    'django_json_widget',
 ]
 
 MIDDLEWARE = [

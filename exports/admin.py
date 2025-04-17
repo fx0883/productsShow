@@ -1,5 +1,12 @@
 from django.contrib import admin
 from .models import ExportList, ExportListItem, ExportTemplate, ExportHistory
+from django import forms
+
+try:
+    from django_json_widget.widgets import JSONEditorWidget
+    HAS_JSON_WIDGET = True
+except ImportError:
+    HAS_JSON_WIDGET = False
 
 class ExportListItemInline(admin.TabularInline):
     model = ExportListItem
@@ -27,8 +34,18 @@ class ExportListItemAdmin(admin.ModelAdmin):
     raw_id_fields = ('export_list', 'product', 'variation')
     readonly_fields = ('added_at',)
 
+class ExportTemplateForm(forms.ModelForm):
+    class Meta:
+        model = ExportTemplate
+        fields = '__all__'
+        if HAS_JSON_WIDGET:
+            widgets = {
+                'fields': JSONEditorWidget
+            }
+
 @admin.register(ExportTemplate)
 class ExportTemplateAdmin(admin.ModelAdmin):
+    form = ExportTemplateForm
     list_display = ('name', 'format', 'user', 'is_public', 'created_at', 'updated_at')
     list_filter = ('format', 'is_public', 'created_at')
     search_fields = ('name', 'description', 'user__username')
